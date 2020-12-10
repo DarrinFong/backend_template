@@ -27,6 +27,6 @@ func main() {
 	routers.InventoryHandler(r)
 	http.Handle("/", r)
 
-	log.Fatal(http.ListenAndServe(":8000", nil))
 	log.Println("Backend listening on http://localhost:8000/")
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }

@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/darrinfong/backend_template/services"
@@ -13,8 +13,7 @@ func InventoryHandler(r *mux.Router) {
 	//GET User Inventory
 	r.HandleFunc("/v1/inventory/GET", func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
-		fmt.Print("Request:")
-		fmt.Println(vars)
+		log.Println(vars)
 
 		bytes, err := services.ListUserInventory(1)
 		if err != nil {
