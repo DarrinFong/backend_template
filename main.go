@@ -6,21 +6,27 @@ import (
 	"net/http"
 	"time"
 
-	inventory "github.com/darrinfong/backend_template/server/inventory"
+	"github.com/darrinfong/backend_template/routers"
+	"github.com/darrinfong/backend_template/services"
+	"github.com/gorilla/mux"
 )
 
-func init() {
-	// Declare mocks
-	// Use DatabaseRepo or MockRepo depending on env.
-	inventory.InventoryRepo = inventory.MockRepo{}
+// Define active DB: 0-DB, 1-Mock
+const dbType int = 1
 
-	// Attach handlers
-	http.HandleFunc("/inventory/GET", inventory.GETUserInventory)
+func init() {
+	// seed random for mocks
+	rand.Seed(time.Now().UnixNano())
+
+	// Set active repo
+	services.SetInventoryDB(dbType)
 }
 
 func main() {
-	// seed random for mock function
-	rand.Seed(time.Now().UnixNano())
-	log.Println("Backend listening on http://localhost:8000/")
+	r := mux.NewRouter()
+	routers.InventoryHandler(r)
+	http.Handle("/", r)
+
 	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Println("Backend listening on http://localhost:8000/")
 }
