@@ -13,9 +13,9 @@ import (
 type MockDB struct{}
 
 //GetItem : Return mock item.
-func (r MockDB) GetItem(id int) *models.Item {
+func (r MockDB) GetItem(id int) models.Item {
 	// return pointer to mock item
-	mockItem := &models.Item{
+	mockItem := models.Item{
 		ID:          id,
 		SellerID:    rand.Intn(3),
 		Name:        "JUNK" + fmt.Sprint(rand.Intn(10)),
@@ -29,11 +29,11 @@ func (r MockDB) GetItem(id int) *models.Item {
 
 //GetInventory : Return slice of mock items, count: number of items
 func (r MockDB) GetInventory(count int) models.Inventory {
-	mockItems := make([]*models.Item, count)
+	mockInventory := make(map[int]models.Item)
 	for i := 0; i < count; i++ {
-		mockItems[i] = r.GetItem(i)
+		mockInventory[i] = r.GetItem(i)
 	}
-	return mockItems
+	return mockInventory
 }
 
 func (r MockDB) CreateItem(item *models.Item) {

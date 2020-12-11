@@ -1,8 +1,9 @@
 package routers
 
 import (
-	"log"
+	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/darrinfong/backend_template/services"
 	"github.com/gorilla/mux"
@@ -11,16 +12,28 @@ import (
 //InventoryHandler : GET inventory
 func InventoryHandler(r *mux.Router) {
 	//GET User Inventory
-	r.HandleFunc("/v1/inventory/GET", func(w http.ResponseWriter, req *http.Request) {
-		vars := mux.Vars(req)
-		log.Println(vars)
-
-		bytes, err := services.ListUserInventory(1)
+	r.HandleFunc("/v1/inventory/GET/{userID:[0-9]+}", func(w http.ResponseWriter, req *http.Request) {
+		params := mux.Vars(req)
+		userID, err := strconv.ParseInt(params["userID"], 10, 32)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		items := services.GetSellerInventory(int(userID))
 		w.WriteHeader(http.StatusOK)
-		w.Write(bytes)
+		json.NewEncoder(w).Encode(items)
+	})
+
+	//GET Item
+	r.HandleFunc("/v1/item/GET/{itemID:[0-9]+}", func(w http.ResponseWriter, req *http.Request) {
+		params := mux.Vars(req)
+		itemID, err := strconv.ParseInt(params["itemID"], 10, 32)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		item := services.GetItem(int(itemID))
+		json.NewEncoder(w).Encode(item)
 	})
 }

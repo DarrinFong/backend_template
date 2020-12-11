@@ -6,7 +6,7 @@ import (
 
 type (
 	//Inventory : struct representation of user inventory
-	Inventory []*Item
+	Inventory map[int]Item
 
 	//Item : struct representation of an inventory item
 	Item struct {
