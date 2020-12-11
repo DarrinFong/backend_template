@@ -7,8 +7,8 @@ import (
 //InventoryDB : managing interface for inventory
 type InventoryDB interface {
 	GetItem(int) models.Item
-	GetInventory(int) models.Inventory
-	CreateItem(*models.Item)
+	GetInventory() models.Inventory
+	CreateItem(*models.Item) models.Item
 	UpdateItem(int *models.Item)
 }
 
@@ -22,7 +22,7 @@ func (r SQLDB) GetItem(id int) models.Item {
 }
 
 //GetInventory : Get user inventory from DB
-func (r SQLDB) GetInventory(userID int) models.Inventory {
+func (r SQLDB) GetInventory() models.Inventory {
 	inventory := make(map[int]models.Item)
 	for i := 0; i < 10; i++ {
 		inventory[i] = r.GetItem(i)
@@ -30,8 +30,8 @@ func (r SQLDB) GetInventory(userID int) models.Inventory {
 	return inventory
 }
 
-func (r SQLDB) CreateItem(item *models.Item) {
-
+func (r SQLDB) CreateItem(item *models.Item) models.Item {
+	return models.Item{}
 }
 
 func (r SQLDB) UpdateItem(int *models.Item) {

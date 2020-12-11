@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/darrinfong/backend_template/models"
 	"github.com/darrinfong/backend_template/services"
 	"github.com/gorilla/mux"
 )
@@ -12,28 +13,37 @@ import (
 //InventoryHandler : GET inventory
 func InventoryHandler(r *mux.Router) {
 	//GET User Inventory
-	r.HandleFunc("/v1/inventory/GET/{userID:[0-9]+}", func(w http.ResponseWriter, req *http.Request) {
-		params := mux.Vars(req)
-		userID, err := strconv.ParseInt(params["userID"], 10, 32)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+	r.HandleFunc("/inventory/", func(w http.ResponseWriter, req *http.Request) {
+		switch req.Method {
+		case "GET":
+			items := services.GetInventory()
+			json.NewEncoder(w).Encode(items)
+		case "POST":
+			var i models.NewItem
+			err := json.NewDecoder(req.Body).Decode(&i)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			json.NewEncoder(w).Encode(services.CreateItem(i))
 		}
-
-		items := services.GetSellerInventory(int(userID))
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(items)
-	})
+	}).Methods("GET", "POST")
 
 	//GET Item
-	r.HandleFunc("/v1/item/GET/{itemID:[0-9]+}", func(w http.ResponseWriter, req *http.Request) {
+	r.HandleFunc("/inventory/{itemID:[0-9]+}", func(w http.ResponseWriter, req *http.Request) {
 		params := mux.Vars(req)
 		itemID, err := strconv.ParseInt(params["itemID"], 10, 32)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		item := services.GetItem(int(itemID))
-		json.NewEncoder(w).Encode(item)
-	})
+
+		switch req.Method {
+		case "GET":
+			item := services.GetItem(int(itemID))
+			json.NewEncoder(w).Encode(item)
+		case "PUT":
+		case "DELETE":
+		}
+	}).Methods("GET", "POST", "PUT", "DELETE")
 }
