@@ -16,7 +16,11 @@ func InventoryHandler(r *mux.Router) {
 	r.HandleFunc("/inventory/", func(w http.ResponseWriter, req *http.Request) {
 		switch req.Method {
 		case "GET":
-			items := services.GetInventory()
+			items, err := services.GetInventory()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
 			json.NewEncoder(w).Encode(items)
 		case "POST":
 			var i models.NewItem
@@ -25,7 +29,9 @@ func InventoryHandler(r *mux.Router) {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			json.NewEncoder(w).Encode(services.CreateItem(i))
+
+			item, _ := services.CreateItem(i)
+			json.NewEncoder(w).Encode(item)
 		}
 	}).Methods("GET", "POST")
 
@@ -40,7 +46,7 @@ func InventoryHandler(r *mux.Router) {
 
 		switch req.Method {
 		case "GET":
-			item := services.GetItem(int(itemID))
+			item, _ := services.GetItem(int(itemID))
 			json.NewEncoder(w).Encode(item)
 		case "PUT":
 		case "DELETE":
