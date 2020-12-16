@@ -1,27 +1,40 @@
 package services
 
 import (
-	"encoding/json"
-
-	dbinterface "github.com/darrinfong/backend_template/repository"
-	"github.com/darrinfong/backend_template/tests"
+	"github.com/darrinfong/backend_template/models"
 )
 
-var inventoryDB dbinterface.InventoryDB
-
-//SetInventoryDB : 0-DB, 1-Mock
-func SetInventoryDB(repoType int) {
-	// Use DatabaseRepo or MockRepo depending on env.
-	switch repoType {
-	case 0:
-		inventoryDB = dbinterface.SQLDB{}
-	case 1:
-		inventoryDB = tests.MockDB{}
-	}
+//InventoryInterface : managing interface for inventory
+type InventoryInterface interface {
+	GetItem(int) (models.Item, error)
+	GetInventory() (models.Inventory, error)
+	CreateItem(models.Item) (models.Item, error)
+	UpdateItem(int, models.Item) (models.Item, error)
 }
 
-// ListUserInventory : Get user inventory from DB and return as JSON
-func ListUserInventory(userID int) ([]byte, error) {
-	mockInventory := inventoryDB.GetInventory(10)
-	return json.Marshal(mockInventory)
+//InventoryRepo :
+var InventoryRepo InventoryInterface
+
+// GetInventory : Get seller inventory from DB and return as JSON
+func GetInventory() (models.Inventory, error) {
+	inv, err := InventoryRepo.GetInventory()
+	return inv, err
+}
+
+// GetItem : Get item by ID
+func GetItem(itemID int) (models.Item, error) {
+	return InventoryRepo.GetItem(itemID)
+}
+
+// CreateItem : Create item
+func CreateItem(newItem models.NewItem) (models.Item, error) {
+	item := models.Item{
+		Name:        newItem.Name,
+		Description: newItem.Description,
+		Price:       newItem.Price,
+		Timestamp:   newItem.Timestamp,
+		Count:       newItem.Count,
+		Status:      0,
+	}
+	return InventoryRepo.CreateItem(item)
 }
