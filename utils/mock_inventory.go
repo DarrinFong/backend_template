@@ -20,7 +20,7 @@ func (r *HMockDB) GetItem(id int) (models.Item, error) {
 		Name:        "STUFF" + fmt.Sprint(rand.Intn(10)),
 		Description: "THIS IS MY STUFF.",
 		Price:       math.Round(rand.Float64()*10000) / 100,
-		Timestamp:   time.Now(),
+		Timestamp:   time.Now().Unix(),
 		Count:       rand.Intn(10),
 		Status:      1,
 	}

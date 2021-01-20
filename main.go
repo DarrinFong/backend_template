@@ -28,7 +28,7 @@ func initDatabase() {
 	// }
 
 	services.InventoryRepo = &utils.HMockDB{}
-	//services.InventoryRepo = &dbinterface.SQLDB{DB: db}
+	// services.InventoryRepo = &dbinterface.SQLDB{DB: db}
 }
 
 func init() {

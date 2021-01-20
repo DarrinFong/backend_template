@@ -2,7 +2,9 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"regexp"
 	"testing"
 	"time"
 
@@ -12,32 +14,42 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var currentTimeUnix = time.Now().Unix()
+
 var i = models.Item{
-	ID:          1,
+	ID:          0,
 	Name:        "thing1",
 	Description: "Test thing1",
 	Price:       11.11,
-	Timestamp:   time.Now(),
+	Timestamp:   currentTimeUnix,
 	Count:       1,
 	Status:      0,
 }
 
+var n = models.NewItem{
+	Name:        "thing1",
+	Description: "Test thing1",
+	Price:       11.11,
+	Timestamp:   currentTimeUnix,
+	Count:       1,
+}
+
 var inv = models.Inventory{
-	1: models.Item{
-		ID:          1,
+	0: models.Item{
+		ID:          0,
 		Name:        "thing1",
 		Description: "Test thing1",
 		Price:       11.11,
-		Timestamp:   time.Now(),
+		Timestamp:   currentTimeUnix,
 		Count:       1,
 		Status:      1,
 	},
-	2: models.Item{
-		ID:          2,
+	1: models.Item{
+		ID:          1,
 		Name:        "thing2",
 		Description: "Test thing2",
 		Price:       22.22,
-		Timestamp:   time.Now(),
+		Timestamp:   currentTimeUnix + 1,
 		Count:       2,
 		Status:      2,
 	},
@@ -53,6 +65,7 @@ func NewMock() (*sql.DB, sqlmock.Sqlmock) {
 }
 
 func TestGetItem(t *testing.T) {
+	t.Parallel()
 	db, mock := NewMock()
 	repo := &dbinterface.SQLDB{DB: db}
 	InventoryRepo = repo
@@ -60,7 +73,6 @@ func TestGetItem(t *testing.T) {
 	defer repo.DB.Close()
 
 	expectedQuery := "SELECT id, name, descriptions, price, timestamp, count, status FROM inventory WHERE id = ?"
-
 	rows := sqlmock.
 		NewRows([]string{"id", "name", "descriptions", "price", "timestamp", "count", "status"}).
 		AddRow(i.ID, i.Name, i.Description, i.Price, i.Timestamp, i.Count, i.Status)
@@ -73,6 +85,7 @@ func TestGetItem(t *testing.T) {
 }
 
 func TestGetInventory(t *testing.T) {
+	t.Parallel()
 	db, mock := NewMock()
 	repo := &dbinterface.SQLDB{DB: db}
 	InventoryRepo = repo
@@ -82,12 +95,35 @@ func TestGetInventory(t *testing.T) {
 	expectedQuery := "SELECT id, name, descriptions, price, timestamp, count, status FROM inventory "
 	expectedRows := sqlmock.
 		NewRows([]string{"id", "name", "descriptions", "price", "timestamp", "count", "status"}).
-		AddRow(inv[1].ID, inv[1].Name, inv[1].Description, inv[1].Price, inv[1].Timestamp, inv[1].Count, inv[1].Status).
-		AddRow(inv[2].ID, inv[2].Name, inv[2].Description, inv[2].Price, inv[2].Timestamp, inv[2].Count, inv[2].Status)
+		AddRow(inv[0].ID, inv[0].Name, inv[0].Description, inv[0].Price, inv[0].Timestamp, inv[0].Count, inv[0].Status).
+		AddRow(inv[1].ID, inv[1].Name, inv[1].Description, inv[1].Price, inv[1].Timestamp, inv[1].Count, inv[1].Status)
 
 	mock.ExpectQuery(expectedQuery).WillReturnRows(expectedRows)
 
 	inventory, err := GetInventory()
 	assert.NoError(t, err)
 	assert.Equal(t, inv, inventory)
+}
+
+func TestCreateItem(t *testing.T) {
+	db, mock := NewMock()
+	repo := &dbinterface.SQLDB{DB: db}
+	InventoryRepo = repo
+
+	defer repo.DB.Close()
+
+	expectedQuery := `INSERT INTO inventory (name, descriptions, price, timestamp, count, status)
+	VALUES (%q, %q, '%f', '%d', %q, %q)
+	SELECT SCOPE_IDENTITY()`
+	expectedQuery = fmt.Sprintf(expectedQuery, n.Name, n.Description, n.Price, n.Timestamp, n.Count, 0)
+	expectedQuery = regexp.QuoteMeta(expectedQuery)
+	expectedRows := sqlmock.
+		NewRows([]string{"id", "name", "descriptions", "price", "timestamp", "count", "status"}).
+		AddRow(i.ID, i.Name, i.Description, i.Price, i.Timestamp, i.Count, i.Status)
+
+	mock.ExpectQuery(expectedQuery).WillReturnRows(expectedRows)
+
+	item, err := CreateItem(n)
+	assert.NoError(t, err)
+	assert.Equal(t, i, item)
 }

@@ -38,3 +38,8 @@ func CreateItem(newItem models.NewItem) (models.Item, error) {
 	}
 	return InventoryRepo.CreateItem(item)
 }
+
+// UpdateItem : Modify existing item
+func UpdateItem(itemID int, modifiedItem models.Item) (models.Item, error) {
+	return InventoryRepo.UpdateItem(itemID, modifiedItem)
+}
