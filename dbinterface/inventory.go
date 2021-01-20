@@ -2,6 +2,7 @@ package dbinterface
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/darrinfong/backend_template/models"
 )
@@ -34,11 +35,22 @@ func (r *SQLDB) GetInventory() (models.Inventory, error) {
 
 //CreateItem :
 func (r *SQLDB) CreateItem(item models.Item) (models.Item, error) {
-	return models.Item{ID: 1}, nil
+	query := `INSERT INTO inventory (name, descriptions, price, timestamp, count, status)
+	VALUES (%q, %q, '%f', '%d', %q, %q)
+	SELECT SCOPE_IDENTITY()`
+	query = fmt.Sprintf(query, item.Name, item.Description, item.Price, item.Timestamp, item.Count, item.Status)
+
+	result := r.DB.QueryRow(query)
+	err := result.Scan(&item.ID, &item.Name, &item.Description, &item.Price, &item.Timestamp, &item.Count, &item.Status)
+	return item, err
 }
 
 //UpdateItem :
 func (r *SQLDB) UpdateItem(id int, item models.Item) (models.Item, error) {
+	query := `UPDATE inventory
+	SET name = $item.Name, description = $item.Description, price = $item.Price, timestamp = $item.Timestamp, count = $item.Count, status = $item.Status
+	WHERE id = $id`
+	println(query)
 	return models.Item{ID: 1}, nil
 }
 

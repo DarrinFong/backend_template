@@ -15,3 +15,10 @@ Route | method | result
 
 ### Run unit tests
 `go test ./...` To run unit tests (using sqlmock for sql db)
+
+### [IN PROGRESS] Setup containerized SQL Database (Postgres)
+`cd postgres`
+
+`docker build ./ -t postgres`
+
+`docker run -p 5432:5432 --name=postgres postgres`
