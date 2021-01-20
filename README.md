@@ -1,9 +1,24 @@
 # backend_template
-Generic Go backend for an online store.
+Learning Go with a generic Go backend for an online store.
 
 *Under construction 👷*
 
-### Containerized SQL Database (Postgres)
+### Run server
+`go run main.go` To start server (using hardcoded mocks to test routes)
+
+Access via http://localhost:8000/
+
+Route | method | result
+--- | --- | ---
+`/inventory/` | GET | {"*id*": {*models.item*}...}
+`/inventory/:id` | GET | {*models.item*}
+
+### Run unit tests
+`go test ./...` To run unit tests (using sqlmock for sql db)
+
+### [IN PROGRESS] Setup containerized SQL Database (Postgres)
 `cd postgres`
+
 `docker build ./ -t postgres`
+
 `docker run -p 5432:5432 --name=postgres postgres`
